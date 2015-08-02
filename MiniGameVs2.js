@@ -44,33 +44,20 @@ var Canvas = function(config) {
 var Tile = function(config) {
     Canvas.call(this, width, height);
     this.image = config.image || getImage("cute/Blank");
-    //this.positionX = config.positionX || 0;
-    //this.positionY = config.positionY || 0;
-    //this.objPass = config.objPass || function() {
-    //    if(image.contains("Tree")){ return false;}
-    //};
-    //this.objInteract = config.objInteract || function() {};
 };
 
 Tile.prototype.draw = function(posX, posY) {
     image(this.image, posX, posY, this.width/10, this.height/5);
 };
-
+// Empty tile 
 var emptyTile = new Tile({});
-var rockTile = new Tile({
-    image: getImage("cute/Rock")
-});
+
+// Obstructions
 var tallTreeTile = new Tile({
     image: getImage("cute/TreeTall")
 });
-var openChestTile = new Tile({
-    image: getImage("cute/ChestOpen")
-});
 var shortTreeTile = new Tile({
     image: getImage("cute/TreeShort")
-});
-var heartTile = new Tile({
-    image: getImage("cute/Heart")
 });
 var uglyTreeTile = new Tile({
     image: getImage("cute/TreeUgly")
@@ -81,10 +68,20 @@ var wallTile = new Tile({
 var tallWallTile = new Tile({
     image: getImage("cute/WallBlockTall")
 });
+var openChestTile = new Tile({
+    image: getImage("cute/ChestOpen")
+});
+
+//  Interactive Tiles
+var rockTile = new Tile({
+    image: getImage("cute/Rock")
+});
+var heartTile = new Tile({
+    image: getImage("cute/Heart")
+});
 var chestTile = new Tile({
     image: getImage("cute/ChestClosed")
 });
-background(62, 120, 33);
 
 //  1=blank, 2=tall tree, 3=short tree, 4=ugly tree, 5=rock
 //  6=tall wall, 7=wall, 8=heart, 9=chest, 10=open chest
@@ -102,46 +99,10 @@ var mapTile = [
 ];
 
 var xPos = 0,
-    yPos = -40,
-    tileNumb = 0;
-    
-//  Splits up the canvas into 10 rows (r)
-for(var r = 0; r < 10; r++) {
-    //  Splits up the canvas into 10 columns (c) 
-    for(var c = 0; c < 10; c++) {
-        //  Obtains the tile number stored in the mapTile array
-        tileNumb = mapTile[r][c];
-        //  Determines which tile to disply based on the tile number
-        if(tileNumb === 1) {
-            //  Draws the tile at position xPos and yPos
-            emptyTile.draw(xPos,yPos);
-        } else if (tileNumb === 2) {
-            tallTreeTile.draw(xPos,yPos);
-        } else if (tileNumb === 3) {
-            shortTreeTile.draw(xPos,yPos);
-        } else if (tileNumb === 4) {
-            uglyTreeTile.draw(xPos,yPos);
-        } else if (tileNumb === 5) {
-            rockTile.draw(xPos,yPos);
-        } else if (tileNumb === 6) {
-            tallWallTile.draw(xPos,yPos);
-        } else if (tileNumb === 7) {
-            wallTile.draw(xPos,yPos);
-        } else if (tileNumb === 8) {
-            heartTile.draw(xPos,yPos);
-        } else if (tileNumb === 9) {
-            chestTile.draw(xPos,yPos);
-        } else if (tileNumb === 10) {
-            openChestTile.draw(xPos,yPos);
-        } else { 
-            emptyTile.draw(xPos,yPos);
-        }
-        xPos += width/10;
-    }
-    yPos += height/10;
-    xPos = 0;
-}
-
+    yPos = 0,
+    tileNumb = 0,
+    charPosX = 200,
+    charPosY = 200;
 var Player = function(config) {
     Canvas.call(this, width, height);
     this.image = config.image || getImage("cute/CharacterCatGirl");
@@ -155,4 +116,87 @@ Player.prototype.draw = function(posX, posY) {
 
 var mainPlayer = new Player({});
 
-mainPlayer.draw(190, 100);
+Player.prototype.move = function(direction) {
+    var curCharPosX = charPosX,
+        curCharPosY = charPosY;
+    if(direction === "UP") {
+        println(charPosY);
+        while(curCharPosY - height/10 < charPosY) {
+            charPosY--;
+        }
+    } else if(direction === "DOWN") {
+        println(charPosY);
+        while(curCharPosY + height/10 > charPosY) {
+            charPosY++;
+        }
+    } else if(direction === "LEFT") {
+        println(charPosX);
+        while(curCharPosX - width/10 < charPosX) {
+            charPosX--;
+        }
+    } else if(direction === "RIGHT") {
+        println(charPosX);
+        while(curCharPosX + width/10 > charPosX) {
+            charPosX++;
+        }
+    }
+};
+
+keyPressed = function() {
+    println(keyCode);
+    if(keyCode === 38) {
+        mainPlayer.move("UP");
+    } else if(keyCode === 40) {
+        mainPlayer.move("DOWN");
+    } else if(keyCode === 37) {
+        mainPlayer.move("LEFT");
+    } else if(keyCode === 39) {
+        mainPlayer.move("RIGHT");
+    }
+};
+
+draw = function() { 
+    //  Draws green background
+    background(62, 120, 33);
+    //  Splits up the canvas into 10 rows (r)
+    for(var r = 0; r < 10; r++) {
+        //  Splits up the canvas into 10 columns (c) 
+        for(var c = 0; c < 10; c++) {
+            //  Obtains the tile number stored in the mapTile array
+            tileNumb = mapTile[r][c];
+            //  Determines which tile to disply based on the tile number
+            if(tileNumb === 1) {
+                //  Draws the tile at position xPos and yPos
+                emptyTile.draw(xPos,yPos);
+            } else if (tileNumb === 2) {
+                tallTreeTile.draw(xPos,yPos);
+            } else if (tileNumb === 3) {
+                shortTreeTile.draw(xPos,yPos);
+            } else if (tileNumb === 4) {
+                uglyTreeTile.draw(xPos,yPos);
+            } else if (tileNumb === 5) {
+                rockTile.draw(xPos,yPos);
+            } else if (tileNumb === 6) {
+                tallWallTile.draw(xPos,yPos);
+            } else if (tileNumb === 7) {
+                wallTile.draw(xPos,yPos);
+            } else if (tileNumb === 8) {
+                heartTile.draw(xPos,yPos);
+            } else if (tileNumb === 9) {
+                chestTile.draw(xPos,yPos);
+            } else if (tileNumb === 10) {
+                openChestTile.draw(xPos,yPos);
+            } else { 
+                emptyTile.draw(xPos,yPos);
+            }
+            xPos += width/10;
+        }
+        yPos += height/10;
+        // Clears xPos at the end of the column loop
+        xPos = 0;
+    }
+    //  Clears yPos at the end of the row loop
+    yPos = 0;
+    
+    mainPlayer.draw(charPosX, charPosY);
+};
