@@ -95,14 +95,14 @@ var mapTile = [
     [6,7,7,6,1,1,6,7,7,6],
     [1,2,2,3,1,1,1,1,1,1],
     [1,1,1,1,1,1,1,1,4,1],
-    [4,3,3,4,1,1,1,1,1,1]
+    [4,3,3,4,1,1,3,1,1,1]
 ];
 
 var xPos = 0,
-    yPos = 0,
+    yPos = -height/10,
     tileNumb = 0,
-    charPosX = 200,
-    charPosY = 200;
+    charPosX = width/5,
+    charPosY = height/10;
 var Player = function(config) {
     Canvas.call(this, width, height);
     this.image = config.image || getImage("cute/CharacterCatGirl");
@@ -117,33 +117,51 @@ Player.prototype.draw = function(posX, posY) {
 var mainPlayer = new Player({});
 
 Player.prototype.move = function(direction) {
-    var curCharPosX = charPosX,
-        curCharPosY = charPosY;
-    if(direction === "UP") {
-        println(charPosY);
-        while(curCharPosY - height/10 < charPosY) {
-            charPosY--;
+    var curCharPosX = charPosX,                     //  keeps track of starting x position
+        curCharPosY = charPosY,                     //  keeps track of starting y position
+        indexX = round(charPosX / (width/10)),      //  determines the x index of the character location
+        indexY = round(charPosY / (height/10) + 1), //  determines the y index of the character location
+        //  looks for objects that are in the way
+        isObsticle = (direction === "UP" && (indexY === 0 || mapTile[indexY - 1][indexX] !== 1)) || 
+                    (direction === "DOWN" && (indexY === 9 || mapTile[indexY + 1][indexX] !== 1)) || 
+                    (direction === "LEFT" && (indexX === 0 || mapTile[indexY][indexX - 1] !== 1)) || 
+                    (direction === "RIGHT" && (indexX === 9 || mapTile[indexY][indexX + 1] !== 1));
+        //println(isObsticle);
+        //println("bX: " + indexX + ", bY: " + indexY);
+    if(!isObsticle) {
+        if(direction === "UP") {
+            charPosY -= height/10 ;
+        } else if(direction === "DOWN") {
+            charPosY += height/10;
+        } else if(direction === "LEFT") {
+            charPosX -= width/10;
+        } else if(direction === "RIGHT") {
+            charPosX += width/10;
         }
-    } else if(direction === "DOWN") {
-        println(charPosY);
-        while(curCharPosY + height/10 > charPosY) {
-            charPosY++;
-        }
-    } else if(direction === "LEFT") {
-        println(charPosX);
-        while(curCharPosX - width/10 < charPosX) {
-            charPosX--;
-        }
-    } else if(direction === "RIGHT") {
-        println(charPosX);
-        while(curCharPosX + width/10 > charPosX) {
-            charPosX++;
-        }
+    } else {
+        //  Add code to address objects you can walk over and/or collect.
+        //  Such as hearts.
     }
+     //println("aX: " + round(charPosX / (width/10)) + ", aY: " + round(charPosY / 40 +1));
+};
+Player.prototype.openItem = function(){
+    //  This method will be used for chests and doors.
+    var itemIndexX = round(charPosX / (width/10)),
+        itemIndexY = round(charPosY / (height/10) + 1),
+        mapTileNum = mapTile[itemIndexY - 1][itemIndexX];
+        println(mapTileNum);
+        if(mapTileNum === 9) {
+            //  If Tile is a Chest; Open Chest.
+            mapTile[itemIndexY - 1][itemIndexX] = 10;
+        } else if (mapTileNum === 10) {
+            //  If Tile is an open chest; Close Chest.
+            mapTile[itemIndexY - 1][itemIndexX] = 9;
+        }
+        
 };
 
 keyPressed = function() {
-    println(keyCode);
+    //println(keyCode);
     if(keyCode === 38) {
         mainPlayer.move("UP");
     } else if(keyCode === 40) {
@@ -152,6 +170,8 @@ keyPressed = function() {
         mainPlayer.move("LEFT");
     } else if(keyCode === 39) {
         mainPlayer.move("RIGHT");
+    } else if(keyCode === 79) {
+        mainPlayer.openItem();
     }
 };
 
@@ -196,7 +216,7 @@ draw = function() {
         xPos = 0;
     }
     //  Clears yPos at the end of the row loop
-    yPos = 0;
+    yPos = -height/10;
     
     mainPlayer.draw(charPosX, charPosY);
 };
