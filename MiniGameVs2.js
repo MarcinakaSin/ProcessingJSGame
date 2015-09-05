@@ -7,7 +7,9 @@ var Button = function(config) {
     this.txtSize = config.txtSize || 11;
     this.label = config.label || "";
     this.message = config.message || "Clicked!";
-    this.onClick = config.onClick || function() {};
+    this.onClick = config.onClick || function() {
+        this.move("UP");
+    };
 };
 
 Button.prototype.draw = function() {
@@ -78,9 +80,12 @@ var rockTile = new Tile({
 });
 var heartTile = new Tile({
     image: getImage("cute/Heart")
-});
+});  
 var chestTile = new Tile({
     image: getImage("cute/ChestClosed")
+});
+var shineTile = new Tile({
+    image: getImage("cute/Selector")
 });
 
 //  1=blank, 2=tall tree, 3=short tree, 4=ugly tree, 5=rock
@@ -100,27 +105,34 @@ var mapTile = [
 
 var xPos = 0,
     yPos = -height/10,
-    tileNumb = 0,
-    charPosX = width/5,
-    charPosY = height/10;
+    tileNumb = 0;
+    
 var Player = function(config) {
     Canvas.call(this, width, height);
     this.image = config.image || getImage("cute/CharacterCatGirl");
-    this.x = config.x || 200;
-    this.y = config.y || 200;
+    this.x = config.x || width/5;
+    this.y = config.y || height/10;
+    this.name = config.name || "Cat Girl";
+    this.experience = 0;
+    this.charLvl = 1;
+    this.smartLvl = 0;      //  smartLvl is going to be used like agility
+    this.caringLvl = 1;     //  caringLvl is going to be used like energy
+    this.health = 10;       //  health is going to keep track of Health
+    
 };
 
-Player.prototype.draw = function(posX, posY) {
-    image(this.image, posX, posY, this.width/10, this.height/5);
+
+Player.prototype.draw = function() {
+    image(this.image, this.x, this.y, this.width/10, this.height/5);
 };
 
 var mainPlayer = new Player({});
 
 Player.prototype.move = function(direction) {
-    var curCharPosX = charPosX,                     //  keeps track of starting x position
-        curCharPosY = charPosY,                     //  keeps track of starting y position
-        indexX = round(charPosX / (width/10)),      //  determines the x index of the character location
-        indexY = round(charPosY / (height/10) + 1), //  determines the y index of the character location
+    var curCharPosX = this.x,                     //  keeps track of starting x position
+        curCharPosY = this.y,                     //  keeps track of starting y position
+        indexX = round(this.x / (width/10)),      //  determines the x index of the character location
+        indexY = round(this.y / (height/10) + 1), //  determines the y index of the character location
         //  looks for objects that are in the way
         isObsticle = (direction === "UP" && (indexY === 0 || mapTile[indexY - 1][indexX] !== 1)) || 
                     (direction === "DOWN" && (indexY === 9 || mapTile[indexY + 1][indexX] !== 1)) || 
@@ -130,13 +142,13 @@ Player.prototype.move = function(direction) {
         //println("bX: " + indexX + ", bY: " + indexY);
     if(!isObsticle) {
         if(direction === "UP") {
-            charPosY -= height/10 ;
+            this.y -= height/10 ;
         } else if(direction === "DOWN") {
-            charPosY += height/10;
+            this.y += height/10;
         } else if(direction === "LEFT") {
-            charPosX -= width/10;
+            this.x -= width/10;
         } else if(direction === "RIGHT") {
-            charPosX += width/10;
+            this.x += width/10;
         }
     } else {
         //  Add code to address objects you can walk over and/or collect.
@@ -144,10 +156,20 @@ Player.prototype.move = function(direction) {
     }
      //println("aX: " + round(charPosX / (width/10)) + ", aY: " + round(charPosY / 40 +1));
 };
+
+Player.prototype.speak = function(width, height) {
+    fill(237, 230, 230);
+    rect(this.x/1.5, this.y, width, height, 5);
+    fill(255, 0, 0);
+    textSize(12);
+    text(" My name is " + this.name + "!", this.x/1.5, this.y + 15);
+    // Allows charater to speak
+};
+
 Player.prototype.openItem = function(){
     //  This method will be used for chests and doors.
-    var itemIndexX = round(charPosX / (width/10)),
-        itemIndexY = round(charPosY / (height/10) + 1),
+    var itemIndexX = round(this.x / (width/10)),
+        itemIndexY = round(this.y / (height/10) + 1),
         mapTileNum = mapTile[itemIndexY - 1][itemIndexX];
         println(mapTileNum);
         if(mapTileNum === 9) {
@@ -157,6 +179,23 @@ Player.prototype.openItem = function(){
             //  If Tile is an open chest; Close Chest.
             mapTile[itemIndexY - 1][itemIndexX] = 9;
         }
+        
+};
+
+Player.prototype.dropsTile = function(){
+    //  This method will be used for chests and doors.
+    var itemIndexX = round(this.x / (width/10)),
+        itemIndexY = round(this.y / (height/10) + 1),
+        mapTileNum = mapTile[itemIndexY - 1][itemIndexX];
+        println(mapTileNum);
+        if(mapTileNum === 1) {
+            //  If Tile is a Chest; Open Chest.
+            mapTile[itemIndexY][itemIndexX] = 11;
+        } else if (mapTileNum === 11) {
+            //  If Tile is an open chest; Close Chest.
+            mapTile[itemIndexY][itemIndexX] = 1;
+        }
+        println(itemIndexX + " " + itemIndexY); 
         
 };
 
@@ -170,8 +209,10 @@ keyPressed = function() {
         mainPlayer.move("LEFT");
     } else if(keyCode === 39) {
         mainPlayer.move("RIGHT");
-    } else if(keyCode === 79) {
+    } else if(keyCode === 79) { // o to open chest
         mainPlayer.openItem();
+    } else if(keyCode === 32) { // space to place selector
+        mainPlayer.dropsTile();
     }
 };
 
@@ -206,6 +247,8 @@ draw = function() {
                 chestTile.draw(xPos,yPos);
             } else if (tileNumb === 10) {
                 openChestTile.draw(xPos,yPos);
+            } else if (tileNumb === 11) {
+                shineTile.draw(xPos,yPos);
             } else { 
                 emptyTile.draw(xPos,yPos);
             }
@@ -218,5 +261,6 @@ draw = function() {
     //  Clears yPos at the end of the row loop
     yPos = -height/10;
     
-    mainPlayer.draw(charPosX, charPosY);
+    mainPlayer.draw();
+    //mainPlayer.speak(140, 20);
 };
