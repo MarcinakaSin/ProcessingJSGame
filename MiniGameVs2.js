@@ -7,9 +7,7 @@ var Button = function(config) {
     this.txtSize = config.txtSize || 11;
     this.label = config.label || "";
     this.message = config.message || "Clicked!";
-    this.onClick = config.onClick || function() {
-        this.move("UP");
-    };
+    this.onClick = config.onClick || function() {};
 };
 
 Button.prototype.draw = function() {
@@ -105,7 +103,8 @@ var mapTile = [
 
 var xPos = 0,
     yPos = -height/10,
-    tileNumb = 0;
+    tileNumb = 0,
+    gameScene = 0;
     
 var Player = function(config) {
     Canvas.call(this, width, height);
@@ -120,7 +119,6 @@ var Player = function(config) {
     this.health = 10;       //  health is going to keep track of Health
     
 };
-
 
 Player.prototype.draw = function() {
     image(this.image, this.x, this.y, this.width/10, this.height/5);
@@ -187,7 +185,7 @@ Player.prototype.dropsTile = function(){
     var itemIndexX = round(this.x / (width/10)),
         itemIndexY = round(this.y / (height/10) + 1),
         mapTileNum = mapTile[itemIndexY - 1][itemIndexX];
-        println(mapTileNum);
+        //println(mapTileNum);
         if(mapTileNum === 1) {
             //  If Tile is a Chest; Open Chest.
             mapTile[itemIndexY][itemIndexX] = 11;
@@ -195,7 +193,7 @@ Player.prototype.dropsTile = function(){
             //  If Tile is an open chest; Close Chest.
             mapTile[itemIndexY][itemIndexX] = 1;
         }
-        println(itemIndexX + " " + itemIndexY); 
+        //println(itemIndexX + " " + itemIndexY); 
         
 };
 
@@ -216,7 +214,73 @@ keyPressed = function() {
     }
 };
 
-draw = function() { 
+/*
+Start Scene is the game menu.  
+It has two buttons and a Title.
+Other buttons may be added as features are added.
+*/
+var startBtn = new Button({
+    x: 125, 
+    y: 150, 
+    width: 150, 
+    height: 40,
+    txtSize: 20,
+    label: "Start Game",
+    onClick: function() {
+        gameScene = 1;
+    }
+});
+
+var quitBtn = new Button({
+    x: 125, 
+    y: 250, 
+    width: 150, 
+    height: 40,
+    txtSize: 20,
+    label: "Quit Game",
+    onClick: function() {
+        println("End Game");
+    }
+});
+
+//  Game Start Scene
+var drawSceneMainMenu = function() {
+    background(51, 167, 255);
+    fill(232, 25, 25);
+    textSize(40);
+    text("Adventure Game!", 25, 100);
+    startBtn.draw();
+    quitBtn.draw();
+};
+
+/*
+Game Scene Level 1 game menu.  
+It has two buttons and a Title.
+Other buttons may be added as features are added.
+*/
+var menuReturnBtn = new Button({
+    x: 0, 
+    y: 0, 
+    width: 100, 
+    height: 20,
+    label: "Return to Menu",
+    onClick: function() {
+        gameScene = 0;
+    }
+});
+
+var menuQuitBtn = new Button({
+    x: menuReturnBtn.x, 
+    y: menuReturnBtn.y + 20, 
+    width: menuReturnBtn.width, 
+    height: menuReturnBtn.height,
+    label: "Quit Game",
+    onClick: function() {
+        println("End Game");
+    }
+});
+//  Game Scene Level 1
+var drawSceneLvlOne = function() {
     //  Draws green background
     background(62, 120, 33);
     //  Splits up the canvas into 10 rows (r)
@@ -260,7 +324,28 @@ draw = function() {
     }
     //  Clears yPos at the end of the row loop
     yPos = -height/10;
-    
     mainPlayer.draw();
     //mainPlayer.speak(140, 20);
+    
+    menuReturnBtn.draw();
+    menuQuitBtn.draw();
+};
+
+draw = function() { 
+    if(gameScene === 0) {
+        drawSceneMainMenu();
+    } else if(gameScene === 1) {
+        drawSceneLvlOne();
+    }
+    //text(mouseX + ", " + mouseY, mouseX + 10, mouseY);
+}; 
+
+mouseClicked = function() {
+    if(gameScene === 0) {
+        startBtn.handleMouseClick();
+        quitBtn.handleMouseClick();
+    } else if(gameScene === 1) {
+        menuReturnBtn.handleMouseClick();
+        menuQuitBtn.handleMouseClick();
+    }
 };
