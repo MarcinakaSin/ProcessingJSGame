@@ -1,29 +1,60 @@
+/* 
+Created by Marcin Ufniarz (9/4/15)
+I'm trying to make a really cute game to encourage kids to get into programming.
+I'm trying to avoid vilance.  
+
+I was thinking this game would work something like this.
+I go around healing creatures.
+There would be 3 types (Wounded, Mean and Good).
+
+I would heal the wounded, and turn them GOOD.  
+The GOOD and MEAN creatures would walk around randomly.  If they interact, they would get WOUNDED.
+I would heal the WOUNDED creatures and make them GOOD.
+
+If the MEAN ones ran into me; I would get injured.
+
+I was also thinking of adding MATH into the game, solve math problems when interacting with rocks to obtain abilities or gear.
+
+This is an open source project and therefore free for anyone to use, and modify. :)
+*/
+
 // Button Constructor and Methods (start)
 var Button = function(config) {
-    this.x = config.x || 0;
-    this.y = config.y || 0;
+    this.xPos = config.xPos || 0;
+    this.yPos = config.yPos || 0;
     this.width = config.width || 150;
     this.height = config.height || 50;
     this.txtSize = config.txtSize || 11;
     this.label = config.label || "";
+    this.image = config.image || getImage("cute/None");
     this.message = config.message || "Clicked!";
     this.onClick = config.onClick || function() {};
 };
 
+Button.prototype.drawCharacter = function() {
+    //fill(255, 0, 0);
+    //rect(this.xPos, this.yPos, this.width, this.height);
+    //fill(0, 0, 0);
+    textSize(this.txtSize);
+    textAlign(LEFT, TOP);
+    text(this.label, this.xPos - this.width/3, this.yPos - this.height/10);
+    image(this.image, this.xPos, this.yPos, this.width, this.height);
+};
+
 Button.prototype.draw = function() {
     fill(255, 0, 0);
-    rect(this.x, this.y, this.width, this.height);
+    rect(this.xPos, this.yPos, this.width, this.height);
     fill(0, 0, 0);
     textSize(this.txtSize);
     textAlign(LEFT, TOP);
-    text(this.label, this.x + 10, this.y + this.height/4);
+    text(this.label, this.xPos + 10, this.yPos + this.height/4);
 };
 
 Button.prototype.isMouseInside = function() {
-    return (mouseX >= this.x &&
-            mouseX <= (this.x + this.width) &&
-            mouseY >= this.y &&
-            mouseY <= (this.y + this.height));
+    return (mouseX >= this.xPos &&
+            mouseX <= (this.xPos + this.width) &&
+            mouseY >= this.yPos &&
+            mouseY <= (this.yPos + this.height));
 };
 
 Button.prototype.handleMouseClick = function() {
@@ -36,18 +67,16 @@ Button.prototype.handleMouseClick = function() {
 
 // Create different types of block objects.  
 // Game Tile Structure.
-var Canvas = function(config) {
-    this.width = config.width || width;
-    this.height = config.height || height;
-};
-
 var Tile = function(config) {
-    Canvas.call(this, width, height);
+    this.height = config.height || height/5;
+    this.width = config.width || width/10;
     this.image = config.image || getImage("cute/Blank");
+    this.xPos = config.xPos || 0;
+    this.yPos = config.yPos || -height/10;
 };
 
 Tile.prototype.draw = function(posX, posY) {
-    image(this.image, posX, posY, this.width/10, this.height/5);
+    image(this.image, posX, posY, this.width, this.height);
 };
 // Empty tile 
 var emptyTile = new Tile({});
@@ -101,36 +130,42 @@ var mapTile = [
     [4,3,3,4,1,1,3,1,1,1]
 ];
 
-var xPos = 0,
-    yPos = -height/10,
-    tileNumb = 0,
+var tileNumb = 0,
     gameScene = 0;
     
 var Player = function(config) {
-    Canvas.call(this, width, height);
+    Tile.call(this, width, height);
     this.image = config.image || getImage("cute/CharacterCatGirl");
-    this.x = config.x || width/5;
-    this.y = config.y || height/10;
+    this.xPos = config.xPos || width/5;
+    this.yPos = config.yPos || height/10;
     this.name = config.name || "Cat Girl";
     this.experience = 0;
     this.charLvl = 1;
     this.smartLvl = 0;      //  smartLvl is going to be used like agility
     this.caringLvl = 1;     //  caringLvl is going to be used like energy
     this.health = 10;       //  health is going to keep track of Health
-    
+    this.onClick = config.onClick || function() {
+        gameScene = 2;
+    };
 };
+
+Player.prototype = Object.create(Button.prototype);
+//Player.prototype = Object.create(Tile.prototype);
 
 Player.prototype.draw = function() {
-    image(this.image, this.x, this.y, this.width/10, this.height/5);
+    image(this.image, this.xPos, this.yPos, this.width, this.height);
 };
 
-var mainPlayer = new Player({});
+var mainPlayer = new Player({
+    xPos: width/5,
+    yPos: height/10
+});
 
 Player.prototype.move = function(direction) {
-    var curCharPosX = this.x,                     //  keeps track of starting x position
-        curCharPosY = this.y,                     //  keeps track of starting y position
-        indexX = round(this.x / (width/10)),      //  determines the x index of the character location
-        indexY = round(this.y / (height/10) + 1), //  determines the y index of the character location
+    var curCharPosX = this.xPos,                     //  keeps track of starting xPos position
+        curCharPosY = this.yPos,                     //  keeps track of starting yPos position
+        indexX = round(this.xPos / (width/10)),      //  determines the xPos index of the character location
+        indexY = round(this.yPos / (height/10) + 1), //  determines the yPos index of the character location
         //  looks for objects that are in the way
         isObsticle = (direction === "UP" && (indexY === 0 || mapTile[indexY - 1][indexX] !== 1)) || 
                     (direction === "DOWN" && (indexY === 9 || mapTile[indexY + 1][indexX] !== 1)) || 
@@ -140,13 +175,13 @@ Player.prototype.move = function(direction) {
         //println("bX: " + indexX + ", bY: " + indexY);
     if(!isObsticle) {
         if(direction === "UP") {
-            this.y -= height/10 ;
+            this.yPos -= height/10 ;
         } else if(direction === "DOWN") {
-            this.y += height/10;
+            this.yPos += height/10;
         } else if(direction === "LEFT") {
-            this.x -= width/10;
+            this.xPos -= width/10;
         } else if(direction === "RIGHT") {
-            this.x += width/10;
+            this.xPos += width/10;
         }
     } else {
         //  Add code to address objects you can walk over and/or collect.
@@ -157,17 +192,17 @@ Player.prototype.move = function(direction) {
 
 Player.prototype.speak = function(width, height) {
     fill(237, 230, 230);
-    rect(this.x/1.5, this.y, width, height, 5);
+    rect(this.xPos/1.5, this.yPos, width, height, 5);
     fill(255, 0, 0);
     textSize(12);
-    text(" My name is " + this.name + "!", this.x/1.5, this.y + 15);
+    text(" My name is " + this.name + "!", this.xPos/1.5, this.yPos);
     // Allows charater to speak
 };
 
 Player.prototype.openItem = function(){
     //  This method will be used for chests and doors.
-    var itemIndexX = round(this.x / (width/10)),
-        itemIndexY = round(this.y / (height/10) + 1),
+    var itemIndexX = round(this.xPos / (width/10)),
+        itemIndexY = round(this.yPos / (height/10) + 1),
         mapTileNum = mapTile[itemIndexY - 1][itemIndexX];
         println(mapTileNum);
         if(mapTileNum === 9) {
@@ -182,8 +217,8 @@ Player.prototype.openItem = function(){
 
 Player.prototype.dropsTile = function(){
     //  This method will be used for chests and doors.
-    var itemIndexX = round(this.x / (width/10)),
-        itemIndexY = round(this.y / (height/10) + 1),
+    var itemIndexX = round(this.xPos / (width/10)),
+        itemIndexY = round(this.yPos / (height/10) + 1),
         mapTileNum = mapTile[itemIndexY - 1][itemIndexX];
         //println(mapTileNum);
         if(mapTileNum === 1) {
@@ -220,8 +255,8 @@ It has two buttons and a Title.
 Other buttons may be added as features are added.
 */
 var startBtn = new Button({
-    x: 125, 
-    y: 150, 
+    xPos: 40, 
+    yPos: 150, 
     width: 150, 
     height: 40,
     txtSize: 20,
@@ -232,8 +267,8 @@ var startBtn = new Button({
 });
 
 var quitBtn = new Button({
-    x: 125, 
-    y: 250, 
+    xPos: 210, 
+    yPos: 150, 
     width: 150, 
     height: 40,
     txtSize: 20,
@@ -243,12 +278,67 @@ var quitBtn = new Button({
     }
 });
 
+var catGirlPlayer = new Button({
+    xPos: width/4 - width/8, 
+    yPos: 250, 
+    width: width/10, 
+    height: height/5,
+    txtSize: 20,
+    image: getImage("cute/CharacterCatGirl"),
+    label: "Cat Girl",
+    onClick: function() {
+        mainPlayer.image = getImage("cute/CharacterCatGirl");
+        playSound(getSound("retro/coin"));
+    }
+});
+
+var boyPlayer = new Button({
+    xPos: width/2 - width/18, 
+    yPos: 250, 
+    width: width/10, 
+    height: height/5,
+    txtSize: 20,
+    image: getImage("cute/CharacterBoy"),
+    label: "Boy",
+    onClick: function() {
+        mainPlayer.image = getImage("cute/CharacterBoy");
+        playSound(getSound("retro/coin"));
+    }
+});
+
+var marciPlayer = new Button({
+    xPos: width - width/4, 
+    yPos: 250, 
+    width: width/10, 
+    height: height/5,
+    txtSize: 20,
+    image: getImage("avatars/marcimus"),
+    label: "Marcimus",
+    onClick: function() {
+        mainPlayer.image = getImage("avatars/marcimus");
+        playSound(getSound("retro/coin"));
+    }
+});
+
 //  Game Start Scene
 var drawSceneMainMenu = function() {
     background(51, 167, 255);
     fill(232, 25, 25);
     textSize(40);
-    text("Adventure Game!", 25, 100);
+    text("Cute Mini Game!", 25, 20);
+    startBtn.draw();
+    quitBtn.draw();
+    catGirlPlayer.drawCharacter();
+    boyPlayer.drawCharacter();
+    marciPlayer.drawCharacter();
+};
+
+//  Player Profile Scene
+var drawSceneProfile = function() {
+    background(51, 167, 255);
+    fill(232, 25, 25);
+    textSize(40);
+    text("Profile page!!!!!", 25, 100);
     startBtn.draw();
     quitBtn.draw();
 };
@@ -259,8 +349,8 @@ It has two buttons and a Title.
 Other buttons may be added as features are added.
 */
 var menuReturnBtn = new Button({
-    x: 0, 
-    y: 0, 
+    xPos: 0, 
+    yPos: 0, 
     width: 100, 
     height: 20,
     label: "Return to Menu",
@@ -270,8 +360,8 @@ var menuReturnBtn = new Button({
 });
 
 var menuQuitBtn = new Button({
-    x: menuReturnBtn.x, 
-    y: menuReturnBtn.y + 20, 
+    xPos: menuReturnBtn.xPos, 
+    yPos: menuReturnBtn.yPos + 20, 
     width: menuReturnBtn.width, 
     height: menuReturnBtn.height,
     label: "Quit Game",
@@ -291,41 +381,41 @@ var drawSceneLvlOne = function() {
             tileNumb = mapTile[r][c];
             //  Determines which tile to disply based on the tile number
             if(tileNumb === 1) {
-                //  Draws the tile at position xPos and yPos
-                emptyTile.draw(xPos,yPos);
+                //  Draws the Tile at position xPos and yPos
+                emptyTile.draw(Tile.xPos,Tile.yPos);
             } else if (tileNumb === 2) {
-                tallTreeTile.draw(xPos,yPos);
+                tallTreeTile.draw(Tile.xPos,Tile.yPos);
             } else if (tileNumb === 3) {
-                shortTreeTile.draw(xPos,yPos);
+                shortTreeTile.draw(Tile.xPos,Tile.yPos);
             } else if (tileNumb === 4) {
-                uglyTreeTile.draw(xPos,yPos);
+                uglyTreeTile.draw(Tile.xPos,Tile.yPos);
             } else if (tileNumb === 5) {
-                rockTile.draw(xPos,yPos);
+                rockTile.draw(Tile.xPos,Tile.yPos);
             } else if (tileNumb === 6) {
-                tallWallTile.draw(xPos,yPos);
+                tallWallTile.draw(Tile.xPos,Tile.yPos);
             } else if (tileNumb === 7) {
-                wallTile.draw(xPos,yPos);
+                wallTile.draw(Tile.xPos,Tile.yPos);
             } else if (tileNumb === 8) {
-                heartTile.draw(xPos,yPos);
+                heartTile.draw(Tile.xPos,Tile.yPos);
             } else if (tileNumb === 9) {
-                chestTile.draw(xPos,yPos);
+                chestTile.draw(Tile.xPos,Tile.yPos);
             } else if (tileNumb === 10) {
-                openChestTile.draw(xPos,yPos);
+                openChestTile.draw(Tile.xPos,Tile.yPos);
             } else if (tileNumb === 11) {
-                shineTile.draw(xPos,yPos);
+                shineTile.draw(Tile.xPos,Tile.yPos);
             } else { 
-                emptyTile.draw(xPos,yPos);
+                emptyTile.draw(Tile.xPos,Tile.yPos);
             }
-            xPos += width/10;
+            Tile.xPos += width/10;
         }
-        yPos += height/10;
-        // Clears xPos at the end of the column loop
-        xPos = 0;
+        Tile.yPos += height/10;
+        // Rests Tile.xPos at the end of the column loop
+        Tile.xPos = 0;
     }
-    //  Clears yPos at the end of the row loop
-    yPos = -height/10;
+    //  Rests Tile.yPos at the end of the row loop
+    Tile.yPos = -height/10;
     mainPlayer.draw();
-    //mainPlayer.speak(140, 20);
+    mainPlayer.speak(140, 20);
     
     menuReturnBtn.draw();
     menuQuitBtn.draw();
@@ -336,6 +426,8 @@ draw = function() {
         drawSceneMainMenu();
     } else if(gameScene === 1) {
         drawSceneLvlOne();
+    } else if(gameScene === 2) {
+        drawSceneProfile();
     }
     //text(mouseX + ", " + mouseY, mouseX + 10, mouseY);
 }; 
@@ -344,8 +436,15 @@ mouseClicked = function() {
     if(gameScene === 0) {
         startBtn.handleMouseClick();
         quitBtn.handleMouseClick();
+        catGirlPlayer.handleMouseClick();
+        boyPlayer.handleMouseClick();
+        marciPlayer.handleMouseClick();
     } else if(gameScene === 1) {
         menuReturnBtn.handleMouseClick();
         menuQuitBtn.handleMouseClick();
+        mainPlayer.handleMouseClick();
+    } else if(gameScene === 2) {
+        startBtn.handleMouseClick();
+        quitBtn.handleMouseClick();
     }
 };
