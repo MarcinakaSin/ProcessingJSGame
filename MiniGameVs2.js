@@ -43,6 +43,7 @@ Button.prototype.drawCharacter = function() {
 
 Button.prototype.draw = function() {
     fill(255, 0, 0);
+    stroke(0);
     rect(this.xPos, this.yPos, this.width, this.height);
     fill(0, 0, 0);
     textSize(this.txtSize);
@@ -192,7 +193,9 @@ Player.prototype.move = function(direction) {
 
 Player.prototype.speak = function(width, height) {
     fill(237, 230, 230);
+    noStroke();
     rect(this.xPos/1.5, this.yPos, width, height, 5);
+    triangle(this.xPos + this.width/2, this.yPos + this.height/3, this.xPos + this.width/2, this.yPos , this.xPos - this.width/8, this.yPos);
     fill(255, 0, 0);
     textSize(12);
     text(" My name is " + this.name + "!", this.xPos/1.5, this.yPos);
@@ -278,6 +281,18 @@ var quitBtn = new Button({
     }
 });
 
+var returnGameBtn = new Button({
+    xPos: width/2 - 90, 
+    yPos: 340, 
+    width: 180, 
+    height: 40,
+    txtSize: 20,
+    label: "Return to Game",
+    onClick: function() {
+        gameScene = 1;
+    }
+});
+
 var catGirlPlayer = new Button({
     xPos: width/4 - width/8, 
     yPos: 250, 
@@ -301,6 +316,7 @@ var boyPlayer = new Button({
     image: getImage("cute/CharacterBoy"),
     label: "Boy",
     onClick: function() {
+        mainPlayer.name = "Scott";
         mainPlayer.image = getImage("cute/CharacterBoy");
         playSound(getSound("retro/coin"));
     }
@@ -315,6 +331,7 @@ var marciPlayer = new Button({
     image: getImage("avatars/marcimus"),
     label: "Marcimus",
     onClick: function() {
+        mainPlayer.name = "Marcimus";
         mainPlayer.image = getImage("avatars/marcimus");
         playSound(getSound("retro/coin"));
     }
@@ -338,9 +355,32 @@ var drawSceneProfile = function() {
     background(51, 167, 255);
     fill(232, 25, 25);
     textSize(40);
-    text("Profile page!!!!!", 25, 100);
-    startBtn.draw();
-    quitBtn.draw();
+    text("Character Profile", 25, 0);
+    fill(54, 247, 99);
+    rect(20, 49, width/2 - 20, height/14);
+    fill(0, 153, 153);
+    textSize(20);
+    text("Name: " + mainPlayer.name, 30, height/8);
+    fill(54, 247, 99);
+    rect(20, 49 * 2, width/2 - 20, height/14);
+    fill(38, 181, 181);
+    text("Level:   " + mainPlayer.charLvl, 30, height/8 * 2);
+    fill(54, 247, 99);
+    rect(20, 49 * 3, width/2 - 20, height/14);
+    fill(0, 153, 153);
+    text("Health: " + mainPlayer.health, 30, height/8 * 3);
+    fill(54, 247, 99);
+    rect(20, 49 * 4, width/2 - 20, height/14);
+    fill(0, 153, 153);
+    text("Smart:  " + mainPlayer.smartLvl, 30, height/8 * 4);
+    fill(54, 247, 99);
+    rect(20, 49 * 5, width/2 - 20, height/14);
+    fill(0, 153, 153);
+    text("Caring: " + mainPlayer.caringLvl, 30, height/8 * 5);
+    
+    image(mainPlayer.image, height/8 * 5, width/8);
+    
+    returnGameBtn.draw();
 };
 
 /*
@@ -444,7 +484,6 @@ mouseClicked = function() {
         menuQuitBtn.handleMouseClick();
         mainPlayer.handleMouseClick();
     } else if(gameScene === 2) {
-        startBtn.handleMouseClick();
-        quitBtn.handleMouseClick();
+        returnGameBtn.handleMouseClick();
     }
 };
