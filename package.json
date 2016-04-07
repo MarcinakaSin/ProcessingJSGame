@@ -1,0 +1,29 @@
+{
+  "name": "mini-js-game",
+  "version": "0.0.0",
+  "description": "This is a game where characters heal monsters and monsters attack characters and monsters.  The only way to win is to heal as many monsters as possible.",
+  "main": "game.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mufniarz/ProcessingJSGame.git"
+  },
+  "keywords": [
+    "game",
+    "processing.js"
+  ],
+  "author": "Marcin M Ufniarz",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mufniarz/ProcessingJSGame/issues"
+  },
+  "homepage": "https://github.com/mufniarz/ProcessingJSGame#readme",
+  "devDependencies": {
+    "del": "^2.2.0",
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.0",
+    "gulp-sourcemaps": "^1.6.0"
+  }
+}
