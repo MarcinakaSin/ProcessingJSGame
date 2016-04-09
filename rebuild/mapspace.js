@@ -1,5 +1,5 @@
 
-
+// This is a constructor for map spaces.
 var MapSpace = function(height, width, image, x, y, elevation, landscape) {
     if(!(this instanceof MapSpace)) {
         return new MapSpace(height, width, image, x, y, elevation, landscape);
