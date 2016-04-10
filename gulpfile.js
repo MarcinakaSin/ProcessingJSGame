@@ -9,11 +9,13 @@ var gulp 	= require('gulp'),
   // Using 'return' makes sure that this process finishes before the next one starts.
   // Provides an array of JS files to concat.
   return gulp.src([
-      'rebuild/tile.js',
-      'rebuild/mapspace.js',
-      'rebuild/maplevel.js',
-      'rebuild/character.js',
-      'rebuild/player.js',
+      'rebuild/map/tile.js',        // base for all items on map
+      'rebuild/map/mapspace.js',    // create spaces
+      'rebuild/map/spaceitem.js',   // create items
+      'rebuild/map/maplevel.js',    // create map
+      /*'rebuild/character/characters.js',
+      'rebuild/character/player.js',
+      'rebuild/character/monster.js',*/
       'rebuild/game.js'
       ])
   // Initialize source mapping chain. Accepts options.
@@ -28,7 +30,7 @@ var gulp 	= require('gulp'),
 
 gulp.task('watchFiles', function() {
   // Uses gulp's 'watch' method to watch changes in the JS files and call the concatScripts task.
-  gulp.watch('rebuild/**.js', ['concatScripts']);
+  gulp.watch('rebuild/**/**.js', ['concatScripts']);
 });
 
 // Sets the 'clean' task to delete compiled code.
