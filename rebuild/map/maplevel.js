@@ -72,8 +72,6 @@ MapOfLevel.prototype.createMap = function(mapArray) {
                         height: height                        
                     });
                     break;
-//  1=blank, 2=tall tree, 3=short tree, 4=ugly tree, 5=rock
-//  6=tall wall, 7=wall, 8=heart, 9=chest, 10=open chest
                 case 5:
                     this.mapSpaces[x][y] = new MapSpace({
                         image: getImage("cute/PlainBlock"),
@@ -140,7 +138,133 @@ MapOfLevel.prototype.draw = function() {
     for(var y = 0; y < this.mapSpaces.length; y++) {
         for(var x = 0; x < this.mapSpaces[y].length; x++) {
             this.mapSpaces[y][x].draw(x, y);
+            if(this.mapSpaces[y][x].spaceItem){
+                this.mapSpaces[y][x].spaceItem.draw(x, y);
+            }
         }
+    }
+
+};
+
+MapOfLevel.prototype.addItem = function(x, y, item) {
+    switch(item) {
+        case "chestclosed":
+            this.mapSpaces[x][y].spaceItem = new SpaceItem({
+                hardness: "solid", // null, brittle, solid
+                image: getImage("cute/ChestClosed"),
+                isBroken: false,
+                isOpen: false
+            });
+            break;
+        case "chestlid":
+            this.mapSpaces[x][y].spaceItem = new SpaceItem({
+                hardness: "solid", // null, brittle, solid
+                image: getImage("cute/ChestLid"),
+                isBroken: false,
+                isOpen: false
+            });
+            break;
+        case "chestopen":
+            this.mapSpaces[x][y].spaceItem = new SpaceItem({
+                hardness: "solid", // null, brittle, solid
+                image: getImage("cute/ChestOpen"),
+                isBroken: false,
+                isOpen: true
+            });
+            break;
+        case "gemblue":
+            this.mapSpaces[x][y].spaceItem = new SpaceItem({
+                hardness: "solid", // null, brittle, solid
+                image: getImage("cute/GemBlue"),
+                isBroken: false,
+                isOpen: true
+            });
+            break;
+        case "gemgreen":
+            this.mapSpaces[x][y].spaceItem = new SpaceItem({
+                hardness: "solid", // null, brittle, solid
+                image: getImage("cute/GemGreen"),
+                isBroken: false,
+                isOpen: true
+            });
+            break;
+        case "gemorange":
+            this.mapSpaces[x][y].spaceItem = new SpaceItem({
+                hardness: "solid", // null, brittle, solid
+                image: getImage("cute/GemOrange"),
+                isBroken: false,
+                isOpen: true
+            });
+            break;
+        case 'heart':
+            this.mapSpaces[x][y].spaceItem = new SpaceItem({
+                hardness: "solid", // null, brittle, solid
+                image: getImage("cute/Heart"),
+                isBroken: false,
+                isOpen: true
+            });
+            break;
+        case 'key':
+            this.mapSpaces[x][y].spaceItem = new SpaceItem({
+                hardness: "solid", // null, brittle, solid
+                image: getImage("cute/Key"),
+                isBroken: false,
+                isOpen: true
+            });
+            break;
+        case 'rock':
+            this.mapSpaces[x][y].spaceItem = new SpaceItem({
+                hardness: "solid", // null, brittle, solid
+                image: getImage("cute/Rock"),
+                isBroken: false,
+                isOpen: true
+            });
+            break;
+        case 'star':
+            this.mapSpaces[x][y].spaceItem = new SpaceItem({
+                hardness: "solid", // null, brittle, solid
+                image: getImage("cute/Star"),
+                isBroken: false,
+                isOpen: true
+            });
+            break;
+        case 'treeshort':
+            this.mapSpaces[x][y].spaceItem = new SpaceItem({
+                hardness: "solid", // null, brittle, solid
+                image: getImage("cute/TreeShort"),
+                isBroken: false,
+                isOpen: true
+            });
+            break;
+        case 'treetall':
+            this.mapSpaces[x][y].spaceItem = new SpaceItem({
+                hardness: "solid", // null, brittle, solid
+                image: getImage("cute/TreeTall"),
+                isBroken: false,
+                isOpen: true
+            });
+            break;
+        case 'treeugly':
+            this.mapSpaces[x][y].spaceItem = new SpaceItem({
+                hardness: "solid", // null, brittle, solid
+                image: getImage("cute/TreeUgly"),
+                isBroken: false,
+                isOpen: true
+            });
+            break;
+        case 'healthheart':
+            this.mapSpaces[x][y].spaceItem = new SpaceItem({
+                hardness: "solid", // null, brittle, solid
+                image: getImage("space/healthheart"),
+                isBroken: false,
+                isOpen: true
+            });
+            break;
+        default:
+            // Empty Space
+            this.mapSpaces[x][y].spaceItem = new SpaceItem({
+
+            });
     }
 
 };

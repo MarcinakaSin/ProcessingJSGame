@@ -16,6 +16,7 @@ var mapTile = [
 var m = new MapOfLevel(5,5);
 m.setStart(1,1);
 m.createMap(mapTile);
+m.addItem(2,2,'chestlid');
 
 
 //println(Object.keys(m));
